@@ -27,7 +27,7 @@ namespace JsonTranslator
             foreach (var languageFolderWithJson in directories)
             {
                 Task.Run(async () => { accessToken = await GetAuthenticationToken(APIKEY); });
-                Console.WriteLine("Access Token is obtaining. Please wait. ************************************* ");
+                Console.WriteLine("Access Token is obtaining. Please wait. *************************************");
                 while (accessToken == null)
                 {
                     
