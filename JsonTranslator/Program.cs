@@ -16,7 +16,15 @@ namespace JsonTranslator
     {
         static readonly string APIKEY = "2bb69405c7cf4b13996087b66df783fb";
         static string accessToken;
-        static void Main(string[] args)
+
+        public static   void Main(string[] args)
+        {
+            Task.Run(async () =>
+            {
+                await TranslateRun();
+            }).GetAwaiter().GetResult();
+        }
+        static async Task TranslateRun()
         {
             var sourceJsonFilePath = @"C:\Source\SY2-Build\SY2-I18n\Phrases\cd-XX\i18n-bundle.json";
             var sourceJson = File.ReadAllText(sourceJsonFilePath);
@@ -26,12 +34,8 @@ namespace JsonTranslator
             var directories = Directory.GetDirectories(@"C:\Users\injector\Documents\Phrases");
             foreach (var languageFolderWithJson in directories)
             {
-                Task.Run(async () => { accessToken = await GetAuthenticationToken(APIKEY); });
                 Console.WriteLine("Access Token is obtaining. Please wait. *************************************");
-                while (accessToken == null)
-                {
-                    
-                }
+                accessToken = await GetAuthenticationToken(APIKEY);
                 var languageName = languageFolderWithJson.Replace("C:\\Users\\injector\\Documents\\Phrases\\", "");
                 Console.WriteLine(languageName + " is gonna be translated ************************************* ");
 
@@ -54,28 +58,26 @@ namespace JsonTranslator
                                     {
                                         var localeAsLanguageName = DefineIfLocaleName(word);
                                         var localeName = word;
-                                        Task.Run(async () =>
-                                        {
+                                     
                                             string output = await Translate(localeAsLanguageName, localeName, accessToken);
                                             phrase.First["Translation"] = output.ToUpper();
                                             phrase.First["TranslationCultureCode"] = languageName;
                                             Console.WriteLine(output);
-                                        }).Wait();
+                                        
                                     }
                                     else
                                     {
                                         if (!(word.Contains('{') || word.Contains('.') || word.Contains('(') || word.Contains('/')))
                                         {
-                                            word = word.Humanize();
+                                            word = word.Humanize(); // delete special characters
                                         }
-                                        Task.Run(async () =>
-                                        {
+                                       
                                             string output = await Translate(word, languageName, accessToken);
                                             phrase.First["Translation"] = output;
                                             phrase.First["TranslationCultureCode"] = languageName;
 
-                                            Console.WriteLine(output);
-                                        }).Wait();
+                                            Console.WriteLine($" word {word} got translated as {output}");
+                                         
                                     }
                                 }
                                 catch (Exception ex)
@@ -91,6 +93,7 @@ namespace JsonTranslator
                 string newJson = JsonConvert.SerializeObject(originalEnglishJson, Formatting.Indented);
                 File.WriteAllText(jsonFilePath, newJson);
                 Console.WriteLine(languageName + " is translated ************************************* ");
+                Console.ReadLine();
             }
         }
 
