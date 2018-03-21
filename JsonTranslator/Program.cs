@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml.Linq;
 using Humanizer;
 using Newtonsoft.Json;
@@ -71,12 +72,15 @@ namespace JsonTranslator
                                         {
                                             word = word.Humanize(); // delete special characters
                                         }
-                                       
-                                            string output = await Translate(word, languageName, accessToken);
-                                            phrase.First["Translation"] = output;
+                                        string output = await TranslateUsingGoogle(word, languageName); // pick one you like - google or microsoft
+
+                                        string output2 = await Translate(word, languageName, accessToken);
+                                        output = output.Length > output2.Length ? output : output2; //take shortest translation
+
+                                        phrase.First["Translation"] = output;
                                             phrase.First["TranslationCultureCode"] = languageName;
 
-                                            Console.WriteLine($" word {word} got translated as {output}");
+                                            Console.WriteLine($" word {word} translation is : {output}");
                                          
                                     }
                                 }
@@ -208,6 +212,27 @@ namespace JsonTranslator
                     return "ERROR: " + result;
 
                 string translatedText = XElement.Parse(result).Value;
+                return translatedText;
+            }
+        }
+
+        static async Task<string> TranslateUsingGoogle(string textToTranslate, string language)
+        {
+            var uri =  HttpUtility.UrlEncode(textToTranslate); 
+            var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl="
+                      + "en" + "&tl=" + language + "&dt=t&q=" + uri;
+       
+
+            using (HttpClient client = new HttpClient())
+            {
+              
+                HttpResponseMessage response = await client.GetAsync(url);
+                string result = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                    return "ERROR: " + result;
+
+                string translatedText = result.Split('\"')[1];
                 return translatedText;
             }
         }
