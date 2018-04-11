@@ -17,6 +17,7 @@ namespace JsonTranslator
     {
         static readonly string APIKEY = "2bb69405c7cf4b13996087b66df783fb";
         static string accessToken;
+        private static string _cLanguageFoldersPath = "C:\\Users\\injector\\Documents\\Phrases\\";
 
         public static   void Main(string[] args)
         {
@@ -32,12 +33,12 @@ namespace JsonTranslator
             JObject originalEnglishJson = JObject.Parse(sourceJson);
 
 
-            var directories = Directory.GetDirectories(@"C:\Users\injector\Documents\Phrases");
+            var directories = Directory.GetDirectories(_cLanguageFoldersPath);
             foreach (var languageFolderWithJson in directories)
             {
                 Console.WriteLine("Access Token is obtaining. Please wait. *************************************");
                 accessToken = await GetAuthenticationToken(APIKEY);
-                var languageName = languageFolderWithJson.Replace("C:\\Users\\injector\\Documents\\Phrases\\", "");
+                var languageName = languageFolderWithJson.Replace(_cLanguageFoldersPath, "");
                 Console.WriteLine(languageName + " is gonna be translated ************************************* ");
 
                 var jsonFilePath = Path.Combine(languageFolderWithJson, @"i18n-bundle.json");
