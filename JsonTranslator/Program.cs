@@ -19,7 +19,7 @@ namespace JsonTranslator
         static string accessToken;
         private static string _cLanguageFoldersPath = "C:\\Users\\injector\\Documents\\Phrases\\";
 
-        public static   void Main(string[] args)
+        public static void Main(string[] args)
         {
             Task.Run(async () =>
             {
@@ -36,9 +36,13 @@ namespace JsonTranslator
             var directories = Directory.GetDirectories(_cLanguageFoldersPath);
             foreach (var languageFolderWithJson in directories)
             {
+                var languageName = languageFolderWithJson.Replace(_cLanguageFoldersPath, "");
+                if (languageName.Length > 5)
+                {
+                    continue;
+                }
                 Console.WriteLine("Access Token is obtaining. Please wait. *************************************");
                 accessToken = await GetAuthenticationToken(APIKEY);
-                var languageName = languageFolderWithJson.Replace(_cLanguageFoldersPath, "");
                 Console.WriteLine(languageName + " is gonna be translated ************************************* ");
 
                 var jsonFilePath = Path.Combine(languageFolderWithJson, @"i18n-bundle.json");
@@ -60,12 +64,12 @@ namespace JsonTranslator
                                     {
                                         var localeAsLanguageName = DefineIfLocaleName(word);
                                         var localeName = word;
-                                     
-                                            string output = await Translate(localeAsLanguageName, localeName, accessToken);
-                                            phrase.First["Translation"] = output.ToUpper();
-                                            phrase.First["TranslationCultureCode"] = languageName;
-                                            Console.WriteLine(output);
-                                        
+
+                                        string output = await Translate(localeAsLanguageName, localeName, accessToken);
+                                        phrase.First["Translation"] = output.ToUpper();
+                                        phrase.First["TranslationCultureCode"] = languageName;
+                                        Console.WriteLine(output);
+
                                     }
                                     else
                                     {
@@ -76,13 +80,14 @@ namespace JsonTranslator
                                         string output = await TranslateUsingGoogle(word, languageName); // pick one you like - google or microsoft
 
                                         string output2 = await Translate(word, languageName, accessToken);
+
                                         output = output.Length > output2.Length ? output : output2; //take shortest translation
 
                                         phrase.First["Translation"] = output;
-                                            phrase.First["TranslationCultureCode"] = languageName;
+                                        phrase.First["TranslationCultureCode"] = languageName;
 
-                                            Console.WriteLine($" word {word} translation is : {output}");
-                                         
+                                        Console.WriteLine($" word {word} translation is : {output}");
+
                                     }
                                 }
                                 catch (Exception ex)
@@ -219,14 +224,14 @@ namespace JsonTranslator
 
         static async Task<string> TranslateUsingGoogle(string textToTranslate, string language)
         {
-            var uri =  HttpUtility.UrlEncode(textToTranslate); 
+            var uri = HttpUtility.UrlEncode(textToTranslate);
             var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl="
                       + "en" + "&tl=" + language + "&dt=t&q=" + uri;
-       
+
 
             using (HttpClient client = new HttpClient())
             {
-              
+
                 HttpResponseMessage response = await client.GetAsync(url);
                 string result = await response.Content.ReadAsStringAsync();
 
