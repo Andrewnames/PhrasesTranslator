@@ -80,8 +80,12 @@ namespace JsonTranslator
                                         string output = await TranslateUsingGoogle(word, languageName); // pick one you like - google or microsoft
 
                                         string output2 = await Translate(word, languageName, accessToken);
-
                                         output = output.Length > output2.Length ? output : output2; //take shortest translation
+
+
+                                        //   string output = await Translate(word, languageName, accessToken);
+                                        //    string output = await TranslateUsingGoogle(word, languageName);
+
 
                                         phrase.First["Translation"] = output;
                                         phrase.First["TranslationCultureCode"] = languageName;
